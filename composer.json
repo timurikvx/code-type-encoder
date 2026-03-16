@@ -1,0 +1,20 @@
+{
+  "name": "timurikvx/code-type-encoder",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Timurikvx\\CodeTypeEncoder\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Тимур",
+      "email": "timurikvx@mail.ru"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "ext-gd": "*"
+  }
+}
