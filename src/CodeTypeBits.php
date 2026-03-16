@@ -66,7 +66,7 @@ class CodeTypeBits
         foreach ($bars as $bar) {
             $barWidth = ceil($bar['width'] * $moduleWidth);
             if ($bar['type'] == 'black') {
-                $rectangle = new Rectangle($x, $y, $barWidth, false);
+                $rectangle = new Rectangle($x, $y, $barWidth);
                 $rectangles[] = $rectangle;
             }
             $x += $barWidth;
