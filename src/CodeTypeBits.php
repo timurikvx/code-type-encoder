@@ -158,7 +158,8 @@ class CodeTypeBits
         return [
             'type'=>$this->type,
             'data'=> base64_encode($imageData),
-            'code'=>$this->barcode
+            'code'=>$this->barcode,
+            'barcode'=>$this->barcode
         ];
     }
 
