@@ -8,6 +8,8 @@ use Timurikvx\CodeTypeEncoder\Contracts\CodeTypeInterface;
 
 class CodeTypeBits
 {
+    protected string $svg = '';
+
     private array $bits = [];
 
     private mixed $image = null;
@@ -52,6 +54,9 @@ class CodeTypeBits
         if($this->type == 'webp'){
             imagewebp($this->image);
         }
+        if($this->type == 'svg'){
+            echo $this->svg;
+        }
     }
 
     private function toImage(int $width = 300, int $height = 150, int $frame = 5, bool $transparent = false)
@@ -92,10 +97,56 @@ class CodeTypeBits
         return imagescale($image, $width, $height, IMG_BICUBIC_FIXED);
     }
 
+    public function toSvg(int $width = 300, int $height = 150, int $frame = 5, bool $transparent = false): string
+    {
+        $bars = $this->getBarWidths();
+        $totalModules = array_sum(array_column($bars, 'width'));
+
+        if ($totalModules == 0) {
+            return '';
+        }
+
+        $moduleWidth = ($width - 2 * $frame) / $totalModules;
+        $fontOffset = $this->getFontOffset(round($moduleWidth));
+
+        $svg = '<svg width="' . $width . '" height="' . $height . '" viewBox="0 0 ' . $width . ' ' . $height . '" xmlns="http://www.w3.org/2000/svg">';
+
+        // Background
+        if (!$transparent) {
+            $svg .= '<rect x="0" y="0" width="' . $width . '" height="' . $height . '" fill="white"/>';
+        }
+
+        $currentX = $frame;
+        $barHeight = $height - $this->font_size - $frame - $fontOffset;
+
+        foreach ($bars as $bar) {
+            $barWidth = $bar['width'] * $moduleWidth;
+            if ($bar['type'] == 'black') {
+                $svg .= '<rect x="' . $currentX . '" y="' . $frame . '" width="' . $barWidth . '" height="' . $barHeight . '" fill="black"/>';
+            }
+            $currentX += $barWidth;
+        }
+
+        // Add text
+        $text = html_entity_decode($this->barcode, ENT_QUOTES, 'UTF-8');
+        $textX = $width / 2;
+        $textY = $height - $frame;
+
+        $svg .= '<text x="' . $textX . '" y="' . $textY . '" font-family="monospace" font-size="' . $this->font_size . '" text-anchor="middle" fill="black">' . $text . '</text>';
+
+        $svg .= '</svg>';
+
+        return $svg;
+    }
+
     #[NoReturn]
     public function answer(): void
     {
-        header('Content-type: image/'.$this->type);
+        if ($this->type === 'svg') {
+            header('Content-type: image/svg+xml');
+        }else{
+            header('Content-type: image/'.$this->type);
+        }
         $this->toFormat();
         die();
     }
@@ -114,13 +165,14 @@ class CodeTypeBits
     private function printText($image, int $width, int $height, int $frame): void
     {
         $black = imagecolorallocate($image, 0, 0, 0);
-        $bbox = imagettfbbox($this->font_size, 0, $this->font_file, $this->barcode);
+        $text = html_entity_decode($this->barcode, ENT_QUOTES, 'UTF-8');
+        $bbox = imagettfbbox($this->font_size, 0, $this->font_file, $text);
 
         $minX = min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
         $maxX = max($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
         $realWidth = $maxX - $minX;
         $w = ($width / 2) - ($realWidth / 2) - $this->font_size;
-        imagettftext($image, $this->font_size, 0, $w + $frame, $height - $frame, $black, $this->font_file, $this->barcode);
+        imagettftext($image, $this->font_size, 0, $w + $frame, $height - $frame, $black, $this->font_file, $text);
     }
 
     /**
@@ -156,7 +208,11 @@ class CodeTypeBits
     public function render(string $type, int $width = 300, int $height = 150, int $frame = 5, $transparent = false): self
     {
         $this->type = $type;
-        $this->image = $this->toImage($width, $height, $frame, $transparent);
+        if($this->type == 'svg'){
+            $this->svg = $this->toSvg($width, $height, $frame, $transparent);
+        }else {
+            $this->image = $this->toImage($width, $height, $frame, $transparent);
+        }
         return $this;
     }
 
