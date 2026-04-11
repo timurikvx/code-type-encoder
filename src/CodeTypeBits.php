@@ -163,7 +163,7 @@ class CodeTypeBits
         $this->toFormat();
         $imageData = ob_get_clean();
         return [
-            'type'=>$this->type,
+            'format'=>$this->type,
             'data'=> base64_encode($imageData),
             'code'=>$this->barcode,
             'barcode'=>$this->barcode
