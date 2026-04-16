@@ -26,7 +26,7 @@ class CodeTypeBits
     protected bool $transparent;
 
 
-    private string $font_file = __DIR__.'\\Fonts\\ocrb.ttf';
+    private string $font_file = __DIR__.'/Fonts/ocrb.ttf';
 
     private CodeTypeInterface $schema;
 
