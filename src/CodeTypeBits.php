@@ -227,11 +227,12 @@ class CodeTypeBits
         return $this;
     }
 
-    public function save(string $path, string $name): void
+    public function save(string $path, string $name): string
     {
         $this->toFormat();
         $imageData = ob_get_clean();
         file_put_contents($path.$name.'.'.$this->type, $imageData);
+        return $path.$name.'.'.$this->type;
     }
 
     private function getFontOffset(int $moduleWidth): int
